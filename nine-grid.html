@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九宫格抽奖</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .container {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffd700;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 30px;
+  }
+
+  .remain {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 6px 18px;
+    color: #ffd700;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .remain span { font-weight: 700; font-size: 18px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    width: 330px;
+    height: 330px;
+    margin: 0 auto 24px;
+  }
+
+  .cell {
+    background: linear-gradient(145deg, #2d2d44, #1e1e33);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell .icon {
+    font-size: 32px;
+    margin-bottom: 2px;
+    transition: transform 0.3s ease;
+  }
+
+  .cell .name {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+  }
+
+  .cell.active {
+    border-color: #ffd700;
+    background: linear-gradient(145deg, #3d3d5c, #2a2a44);
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.5), inset 0 0 24px rgba(255, 215, 0, 0.08);
+  }
+
+  .cell.active .icon { transform: scale(1.15); }
+  .cell.active .name { color: #ffd700; }
+
+  /* 中间抽奖按钮 */
+  .cell.center {
+    background: linear-gradient(145deg, #ff6b35, #e04e1a);
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+    transition: all 0.2s ease;
+    gap: 2px;
+  }
+
+  .cell.center:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 28px rgba(255, 107, 53, 0.6);
+  }
+  .cell.center:active { transform: scale(0.97); }
+
+  .cell.center.disabled {
+    background: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    pointer-events: none;
+  }
+  .cell.center.disabled:hover { transform: none; }
+
+  .cell.center .icon { font-size: 24px; }
+  .cell.center .name { font-size: 16px; color: #fff; }
+
+  /* 结果弹窗 */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes confetti { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-160px) rotate(720deg); opacity: 0; } }
+
+  .popup {
+    background: #1e1e33;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    text-align: center;
+    min-width: 280px;
+    animation: popIn 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .popup .prize-icon { font-size: 56px; animation: float 1.5s ease infinite; }
+  .popup .prize-name { font-size: 22px; color: #ffd700; font-weight: 700; margin: 12px 0 4px; }
+  .popup .prize-desc { font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-bottom: 20px; }
+
+  .popup button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #1a1a2e;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .popup button:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4); }
+  .popup button:active { transform: scale(0.98); }
+
+  .records {
+    margin-top: 24px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    max-width: 330px;
+    text-align: left;
+  }
+
+  .records h4 {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .record-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .record-item .time { color: rgba(255, 255, 255, 0.3); }
+  .record-item .rprize { color: #ffd700; }
+
+  /* 彩带 */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 200;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">🎰 幸运九宫格</div>
+  <div class="subtitle">转动你的好运时刻</div>
+
+  <div class="remain">剩余抽奖次数 <span id="remainCount">5</span></div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="records" id="records">
+    <h4>📋 抽奖记录</h4>
+    <div id="recordList"><span style="color:rgba(255,255,255,0.25)">暂无记录</span></div>
+  </div>
+</div>
+
+<script>
+// ==================== 奖品配置 ====================
+const prizes = [
+  { id: 0, icon: '🧧', name: '88元红包',   desc: '可直接提现至微信零钱', weight: 2 },
+  { id: 1, icon: '📱', name: 'iPhone 16',  desc: '价值 ¥6,999 手机一部', weight: 0.3 },
+  { id: 2, icon: '🎧', name: 'AirPods',    desc: '价值 ¥1,299 耳机一副', weight: 1 },
+  { id: 3, icon: '🎟️', name: '5元优惠券',   desc: '满10元可用，全场通用', weight: 10 },
+  { id: 4, icon: '💎', name: '100元红包',   desc: '可直接提现至微信零钱', weight: 1.5 },
+  { id: 5, icon: '🧸', name: '限量手办',    desc: '品牌联名限定款',        weight: 0.5 },
+  { id: 6, icon: '🎫', name: '3元优惠券',   desc: '满5元可用，全场通用',   weight: 12 },
+  { id: 7, icon: '✨', name: '谢谢参与',    desc: '下次好运，再试试吧',    weight: 15 },
+  { id: 8, icon: '🪙', name: '10元话费',   desc: '充值后24小时内到账',    weight: 3 },
+];
+
+// ==================== 状态 ====================
+let remain = 5;
+let spinning = false;
+let records = [];
+let activeIndex = -1;
+let timer = null;
+
+// ==================== 渲染 ====================
+const grid = document.getElementById('grid');
+const remainEl = document.getElementById('remainCount');
+const recordList = document.getElementById('recordList');
+
+function buildGrid() {
+  grid.innerHTML = '';
+
+  prizes.forEach((p, i) => {
+    // 抽奖按钮永远在中间 (index 4)
+    const pos = i <= 3 ? i : i + 1; // 跳过中间位置给按钮
+    const cell = document.createElement('div');
+
+    if (i === 4) {
+      // 中间：抽奖按钮
+      cell.className = 'cell center' + (spinning || remain === 0 ? ' disabled' : '');
+      cell.innerHTML = `<span class="icon">🎯</span><span class="name">抽 奖</span>`;
+      cell.addEventListener('click', startLottery);
+      cell.style.order = 4;
+      cell.dataset.index = 'center';
+    } else {
+      cell.className = 'cell';
+      cell.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span>`;
+      cell.style.order = pos >= 4 ? pos + 1 : pos;
+      cell.dataset.index = i;
+      cell.dataset.order = cell.style.order;
+    }
+    grid.appendChild(cell);
+  });
+}
+
+function updateRemain() {
+  remainEl.textContent = remain;
+  const btn = grid.querySelector('.cell.center');
+  if (remain === 0 || spinning) {
+    btn.classList.add('disabled');
+  } else {
+    btn.classList.remove('disabled');
+  }
+}
+
+function updateRecords() {
+  if (records.length === 0) {
+    recordList.innerHTML = '<span style="color:rgba(255,255,255,0.25)">暂无记录</span>';
+    return;
+  }
+  recordList.innerHTML = records
+    .map(r => `<div class="record-item"><span class="time">${r.time}</span><span class="rprize">${r.name}</span></div>`)
+    .join('');
+}
+
+// ==================== 抽奖算法（加权随机） ====================
+function weightedRandom() {
+  const total = prizes.reduce((s, p) => s + p.weight, 0);
+  let rand = Math.random() * total;
+  for (let i = 0; i < prizes.length; i++) {
+    rand -= prizes[i].weight;
+    if (rand <= 0) return i;
+  }
+  return prizes.length - 1;
+}
+
+// ==================== 动画 ====================
+function setActive(cellIndex) {
+  // 清除上一个 active
+  const prev = grid.querySelector('.cell.active');
+  if (prev) prev.classList.remove('active');
+
+  // 找到对应格子
+  const cells = grid.querySelectorAll('.cell:not(.center)');
+  for (const c of cells) {
+    if (parseInt(c.dataset.index) === cellIndex) {
+      c.classList.add('active');
+      break;
+    }
+  }
+  activeIndex = cellIndex;
+}
+
+// 外圈顺时针顺序: 0,1,2,5,8,7,6,3 (跳过中间的 4)
+const ringOrder = [0, 1, 2, 5, 8, 7, 6, 3];
+
+function runAnimation(finalIndex, callback) {
+  let step = 0;
+  let currentRingPos = ringOrder.indexOf(activeIndex);
+  if (currentRingPos === -1) currentRingPos = 0;
+
+  const totalRounds = 3;            // 完整圈数
+  const finalRingPos = ringOrder.indexOf(finalIndex);
+  // 计算需要跑的步数：完整圈数 + 到目标位置的额外步数
+  const stepsToTarget = (totalRounds * 8) +
+    ((finalRingPos - currentRingPos + 8) % 8);
+
+  let totalSteps = stepsToTarget;
+  let currentStep = 0;
+  let delay = 80; // 初始速度
+
+  function tick() {
+    if (currentStep >= totalSteps) {
+      // 最后高亮目标格子
+      setActive(finalIndex);
+      // 短暂停顿后回调
+      setTimeout(callback, 300);
+      return;
+    }
+
+    const ringPos = (currentRingPos + 1 + currentStep) % 8;
+    setActive(ringOrder[ringPos]);
+
+    // 速度曲线：先快后慢 (easeOut)
+    const progress = currentStep / totalSteps;
+    delay = 60 + progress * 280;
+
+    currentStep++;
+    timer = setTimeout(tick, delay);
+  }
+
+  timer = setTimeout(tick, 80);
+}
+
+// ==================== 主流程 ====================
+function startLottery() {
+  if (spinning || remain <= 0) return;
+
+  spinning = true;
+  remain--;
+  updateRemain();
+
+  const finalIndex = weightedRandom();
+  const prize = prizes[finalIndex];
+
+  runAnimation(finalIndex, () => {
+    spinning = false;
+    updateRemain();
+
+    // 记录
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    records.unshift({ time: timeStr, name: prize.name });
+    updateRecords();
+
+    // 弹窗
+    showResult(prize);
+  });
+}
+
+// ==================== 弹窗 ====================
+function showResult(prize) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+
+  const isWin = prize.name !== '谢谢参与';
+
+  overlay.innerHTML = `
+    <div class="popup">
+      <div class="prize-icon">${prize.icon}</div>
+      <div class="prize-name">${isWin ? prize.name : '😢 谢谢参与'}</div>
+      <div class="prize-desc">${prize.desc}</div>
+      <button>${remain > 0 ? '继续抽奖' : '知道了'}</button>
+    </div>
+  `;
+
+  overlay.querySelector('button').addEventListener('click', () => {
+    overlay.remove();
+    if (remain === 0) showAllOut();
+  });
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  document.body.appendChild(overlay);
+
+  // 中奖了放彩带
+  if (isWin) spawnConfetti();
+}
+
+function showAllOut() {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="popup">
+      <div class="prize-icon">🎉</div>
+      <div class="prize-name">抽奖机会已用完</div>
+      <div class="prize-desc">今日共获得 ${records.filter(r => r.name !== '谢谢参与').length} 个奖品</div>
+      <button>好的</button>
+    </div>
+  `;
+  overlay.querySelector('button').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+// ==================== 彩带特效 ====================
+function spawnConfetti() {
+  const colors = ['#ffd700', '#ff6b35', '#00d2ff', '#ff2d55', '#32ff7e', '#ff9500', '#af52de', '#5ac8fa'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.top = (40 + Math.random() * 30) + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (6 + Math.random() * 10) + 'px';
+      piece.style.height = (6 + Math.random() * 10) + 'px';
+      piece.style.animation = `confetti ${0.8 + Math.random() * 1.2}s ease forwards`;
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 2000);
+    }, i * 25);
+  }
+}
+
+// ==================== 初始化 ====================
+buildGrid();
+updateRemain();
+updateRecords();
+</script>
+</body>
+</html>
