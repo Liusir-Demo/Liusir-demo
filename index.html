@@ -3,66 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>蒙牛好礼 幸运抽奖</title>
+<title>蒙牛 × FIFA 2026 世界杯 · 幸运抽奖</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(180deg, #e8f8e0 0%, #c8e8c0 30%, #a8d8a0 60%, #8bc78b 100%);
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
     user-select: none;
     -webkit-user-select: none;
-    position: relative;
+    background: #0a1628;
     overflow-x: hidden;
   }
 
-  /* 背景装饰 - 云朵 */
-  .bg-cloud {
+  /* ==================== 页面容器 ==================== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ==================== 落地页 ==================== */
+  #landing {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0a1628 0%, #0d2137 40%, #0f2a45 60%, #0a1628 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  /* 背景星光 */
+  .stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 2s ease infinite;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.4); }
+  }
+
+  /* 背景六边形足球纹理 */
+  .bg-hex {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.04;
+    background-image:
+      radial-gradient(circle at 15% 20%, #4CAF50 1px, transparent 1px),
+      radial-gradient(circle at 75% 30%, #4CAF50 1px, transparent 1px),
+      radial-gradient(circle at 40% 60%, #4CAF50 1px, transparent 1px),
+      radial-gradient(circle at 60% 75%, #4CAF50 1px, transparent 1px),
+      radial-gradient(circle at 25% 85%, #4CAF50 1px, transparent 1px),
+      radial-gradient(circle at 80% 65%, #4CAF50 1px, transparent 1px);
+    background-size: 200px 200px;
+  }
+
+  /* 光晕 */
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+  }
+  .glow-orb.g1 { width: 250px; height: 250px; background: #00A850; top: -5%; left: -15%; }
+  .glow-orb.g2 { width: 200px; height: 200px; background: #1a5cff; bottom: 10%; right: -10%; }
+  .glow-orb.g3 { width: 180px; height: 180px; background: #ff1744; top: 40%; right: -8%; opacity: 0.15; }
+
+  /* 世界杯年份大字 */
+  .wc-year-wrap {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 6px;
+  }
+  .wc-year {
+    font-size: 64px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(180deg, #ffd700 0%, #ff8f00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 8px rgba(255,215,0,0.4));
+  }
+
+  .wc-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 10px;
+  }
+
+  /* 蒙牛 Logo SVG */
+  .mengniu-logo {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+  }
+
+  /* 联合品牌区 */
+  .co-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .co-brand .times {
+    font-size: 20px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 300;
+  }
+  .wc-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 30px;
+    padding: 8px 16px;
+  }
+  .wc-badge .trophy { font-size: 24px; }
+  .wc-badge .wc-text {
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    line-height: 1.4;
+    text-align: left;
+  }
+  .wc-badge .wc-text strong {
+    display: block;
+    font-size: 13px;
+    color: #ffd700;
+    letter-spacing: 2px;
+  }
+
+  /* 主标题 */
+  .main-title {
+    position: relative;
+    z-index: 1;
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .main-title .hl {
+    color: #00A850;
+  }
+
+  .main-desc {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+  }
+
+  /* 奖品预览卡片 */
+  .prize-previews {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .prize-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px 14px;
+    text-align: center;
+    min-width: 75px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .prize-card .picon { font-size: 30px; }
+  .prize-card .pname { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+  /* CTA 按钮 */
+  .btn-start {
+    position: relative;
+    z-index: 1;
+    width: 240px;
+    padding: 16px 0;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #00A850 0%, #00c060 50%, #00A850 100%);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0,168,80,0.4);
+    transition: all 0.2s ease;
+    margin-bottom: 16px;
+  }
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(0,168,80,0.55);
+  }
+  .btn-start:active { transform: scale(0.97); }
+
+  .btn-start .arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  .btn-start:hover .arrow { transform: translateX(4px); }
+
+  .landing-footer {
+    position: relative;
+    z-index: 1;
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 1px;
+  }
+
+  /* ==================== 足球动画 ==================== */
+  .football {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    pointer-events: none;
+    z-index: 2;
+    animation: ballFloat 3s ease infinite;
+  }
+  @keyframes ballFloat {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-30px) rotate(120deg); }
+    60% { transform: translateY(-10px) rotate(240deg); }
+  }
+
+  /* ==================== 抽奖页 ==================== */
+  #lottery {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #e8f8e0 0%, #c8e8c0 30%, #a8d8a0 60%, #8bc78b 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  /* 抽奖页复用之前的绿色背景装饰 */
+  #lottery .bg-cloud {
     position: fixed;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.5);
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
   }
-  .bg-cloud::before, .bg-cloud::after {
+  #lottery .bg-cloud::before, #lottery .bg-cloud::after {
     content: '';
     position: absolute;
     background: inherit;
     border-radius: 50%;
   }
-  .bg-cloud.c1 { width: 120px; height: 50px; top: 8%; left: 5%; }
-  .bg-cloud.c1::before { width: 50px; height: 50px; top: -25px; left: 20px; }
-  .bg-cloud.c1::after  { width: 70px; height: 40px; top: -15px; left: 50px; }
-  .bg-cloud.c2 { width: 100px; height: 40px; top: 12%; right: 8%; }
-  .bg-cloud.c2::before { width: 40px; height: 40px; top: -20px; left: 15px; }
-  .bg-cloud.c2::after  { width: 55px; height: 35px; top: -12px; left: 40px; }
-
-  /* 草地纹理 */
-  .grass {
+  #lottery .bg-cloud.c1 { width: 120px; height: 50px; top: 8%; left: 5%; }
+  #lottery .bg-cloud.c1::before { width: 50px; height: 50px; top: -25px; left: 20px; }
+  #lottery .bg-cloud.c1::after  { width: 70px; height: 40px; top: -15px; left: 50px; }
+  #lottery .bg-cloud.c2 { width: 100px; height: 40px; top: 12%; right: 8%; }
+  #lottery .bg-cloud.c2::before { width: 40px; height: 40px; top: -20px; left: 15px; }
+  #lottery .bg-cloud.c2::after  { width: 55px; height: 35px; top: -12px; left: 40px; }
+  #lottery .grass {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: 80px;
-    background: linear-gradient(180deg, rgba(100,180,80,0.4) 0%, rgba(80,160,60,0.6) 50%, rgba(60,140,40,0.8) 100%);
+    background: linear-gradient(180deg, rgba(100,180,80,0.3) 0%, rgba(80,160,60,0.5) 50%, rgba(60,140,40,0.7) 100%);
     pointer-events: none;
     z-index: 0;
     border-radius: 60% 70% 0 0 / 30px 30px 0 0;
   }
-
-  /* 奶牛斑点装饰 */
-  .cow-spot {
+  #lottery .cow-spot {
     position: fixed;
-    background: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.3);
     border-radius: 45% 55% 50% 50%;
     pointer-events: none;
     z-index: 0;
   }
-  .cow-spot.s1 { width: 80px; height: 55px; bottom: 15%; left: 8%; }
-  .cow-spot.s2 { width: 60px; height: 70px; bottom: 10%; right: 6%; }
-  .cow-spot.s3 { width: 40px; height: 35px; bottom: 20%; left: 25%; }
+  #lottery .cow-spot.s1 { width: 80px; height: 55px; bottom: 15%; left: 8%; }
+  #lottery .cow-spot.s2 { width: 60px; height: 70px; bottom: 10%; right: 6%; }
+  #lottery .cow-spot.s3 { width: 40px; height: 35px; bottom: 20%; left: 25%; }
 
   .container {
     text-align: center;
@@ -71,7 +313,6 @@
     z-index: 10;
   }
 
-  /* 品牌头部 */
   .brand {
     display: flex;
     align-items: center;
@@ -89,7 +330,9 @@
     justify-content: center;
     font-size: 28px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
   }
+  .brand-logo svg { width: 32px; height: 32px; }
   .brand-name {
     font-size: 22px;
     font-weight: 700;
@@ -110,7 +353,22 @@
   .subtitle {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+
+  /* 世界杯元素条 */
+  .wc-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 16px;
+    padding: 5px 14px;
+    margin-bottom: 16px;
+    color: #ffd700;
+    font-size: 11px;
+    font-weight: 600;
     letter-spacing: 1px;
   }
 
@@ -121,7 +379,7 @@
     padding: 6px 20px;
     color: #2e7d32;
     font-size: 13px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     font-weight: 500;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
@@ -161,21 +419,8 @@
     pointer-events: none;
   }
 
-  .cell .icon {
-    font-size: 32px;
-    margin-bottom: 2px;
-    transition: transform 0.3s ease;
-    position: relative;
-    z-index: 1;
-  }
-
-  .cell .name {
-    font-size: 12px;
-    color: #33691e;
-    font-weight: 600;
-    position: relative;
-    z-index: 1;
-  }
+  .cell .icon { font-size: 32px; margin-bottom: 2px; transition: transform 0.3s ease; position: relative; z-index: 1; }
+  .cell .name { font-size: 12px; color: #33691e; font-weight: 600; position: relative; z-index: 1; }
 
   .cell.active {
     border-color: #00A850;
@@ -185,7 +430,6 @@
   .cell.active .icon { transform: scale(1.15); }
   .cell.active .name { color: #fff; }
 
-  /* 中间抽奖按钮 */
   .cell.center {
     background: linear-gradient(145deg, #00A850, #008840);
     border: none;
@@ -199,12 +443,8 @@
     gap: 2px;
   }
   .cell.center::before { display: none; }
-  .cell.center:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 24px rgba(0, 168, 80, 0.6);
-  }
+  .cell.center:hover { transform: scale(1.03); box-shadow: 0 6px 24px rgba(0, 168, 80, 0.6); }
   .cell.center:active { transform: scale(0.97); }
-
   .cell.center.disabled {
     background: #b0b0b0;
     cursor: not-allowed;
@@ -212,11 +452,10 @@
     pointer-events: none;
   }
   .cell.center.disabled:hover { transform: none; }
-
   .cell.center .icon { font-size: 22px; }
   .cell.center .name { font-size: 16px; color: #fff; }
 
-  /* 弹窗基础 */
+  /* 弹窗 */
   .overlay {
     position: fixed;
     inset: 0;
@@ -229,7 +468,6 @@
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
-
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
@@ -248,8 +486,6 @@
     position: relative;
     overflow: hidden;
   }
-
-  /* 头顶绿色装饰条 */
   .popup::before {
     content: '';
     position: absolute;
@@ -284,170 +520,208 @@
     margin-top: 8px;
   }
 
-  /* ===== 收货地址表单 ===== */
-  .ship-form {
-    text-align: left;
-    margin-bottom: 12px;
+  /* 收货地址表单 */
+  .ship-form { text-align: left; margin-bottom: 12px; }
+  .ship-form .form-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; text-align: center; letter-spacing: 1px; }
+  .ship-form .field { margin-bottom: 10px; }
+  .ship-form label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+  .ship-form input, .ship-form textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 10px;
+    font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s;
+    background: #fafafa; resize: none;
   }
-  .ship-form .form-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 12px;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-  .ship-form .field {
-    margin-bottom: 10px;
-  }
-  .ship-form label {
-    display: block;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-  .ship-form input,
-  .ship-form textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s;
-    background: #fafafa;
-    resize: none;
-  }
-  .ship-form input:focus,
-  .ship-form textarea:focus {
-    border-color: #00A850;
-    background: #fff;
-  }
-  .ship-form textarea {
-    height: 60px;
-  }
-  .ship-form .error {
-    font-size: 11px;
-    color: #e53935;
-    margin-top: 2px;
-    display: none;
-  }
-  .ship-form .field.invalid input,
-  .ship-form .field.invalid textarea {
-    border-color: #e53935;
-    background: #fff5f5;
-  }
-  .ship-form .field.invalid .error {
-    display: block;
-  }
-  .submit-success {
-    text-align: center;
-    padding: 20px 0;
-  }
-  .submit-success .check {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #E8F5E9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 12px;
-    font-size: 28px;
-  }
+  .ship-form input:focus, .ship-form textarea:focus { border-color: #00A850; background: #fff; }
+  .ship-form textarea { height: 60px; }
+  .ship-form .error { font-size: 11px; color: #e53935; margin-top: 2px; display: none; }
+  .ship-form .field.invalid input, .ship-form .field.invalid textarea { border-color: #e53935; background: #fff5f5; }
+  .ship-form .field.invalid .error { display: block; }
+  .submit-success { text-align: center; padding: 20px 0; }
+  .submit-success .check { width: 56px; height: 56px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; }
   .submit-success p { font-size: 14px; color: #666; }
 
   /* 抽奖记录 */
   .records {
-    margin-top: 20px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 12px;
-    max-width: 330px;
-    text-align: left;
+    margin-top: 20px; color: rgba(255, 255, 255, 0.8); font-size: 12px; max-width: 330px; text-align: left;
   }
-  .records h4 {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 13px;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-  }
-  .record-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  }
-  .record-item .time { color: rgba(255, 255, 255, 0.55); }
+  .records h4 { color: rgba(255, 255, 255, 0.9); font-size: 13px; margin-bottom: 8px; letter-spacing: 1px; }
+  .record-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .record-item .time { color: rgba(255,255,255,0.55); }
   .record-item .rprize { color: #fff; font-weight: 500; }
 
   .confetti-piece {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    pointer-events: none;
-    z-index: 200;
+    position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 200;
+  }
+
+  /* 返回按钮 */
+  .back-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
   }
 </style>
 </head>
 <body>
 
-<!-- 背景装饰 -->
-<div class="bg-cloud c1"></div>
-<div class="bg-cloud c2"></div>
-<div class="cow-spot s1"></div>
-<div class="cow-spot s2"></div>
-<div class="cow-spot s3"></div>
-<div class="grass"></div>
+<!-- ==================== 落地页 ==================== -->
+<div class="page active" id="landing">
+  <div class="stars" id="stars"></div>
+  <div class="bg-hex"></div>
+  <div class="glow-orb g1"></div>
+  <div class="glow-orb g2"></div>
+  <div class="glow-orb g3"></div>
 
-<div class="container">
-  <div class="brand">
-    <div class="brand-logo">🐄</div>
-    <span class="brand-name">蒙 牛</span>
+  <!-- 足球动画 -->
+  <div class="football" style="top:12%;right:15%;">⚽</div>
+  <div class="football" style="top:60%;left:10%;animation-delay:1.2s;width:36px;height:36px;">⚽</div>
+
+  <!-- 蒙牛 Logo -->
+  <div class="mengniu-logo">
+    <svg width="140" height="50" viewBox="0 0 280 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- 绿色圆环底 -->
+      <circle cx="42" cy="50" r="36" fill="#00A850"/>
+      <!-- 白色牛角/抽象图形 -->
+      <path d="M28 60 Q20 40 28 22 Q34 10 42 14 Q50 10 56 22 Q64 40 56 60 Z" fill="#fff" opacity="0.95"/>
+      <!-- 内部绿色水滴 -->
+      <path d="M42 28 Q36 20 38 14 Q42 8 46 14 Q48 20 42 28 Z" fill="#00A850" opacity="0.7"/>
+      <!-- 蒙牛文字 -->
+      <text x="100" y="44" font-family="'PingFang SC','Microsoft YaHei','Heiti SC',sans-serif" font-size="36" font-weight="900" fill="#fff" letter-spacing="4">蒙牛</text>
+      <!-- 下划线 -->
+      <line x1="100" y1="58" x2="220" y2="58" stroke="#00A850" stroke-width="3" stroke-linecap="round"/>
+      <!-- 小字 -->
+      <text x="230" y="48" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" fill="rgba(255,255,255,0.6)" letter-spacing="1">MENGNIU</text>
+    </svg>
   </div>
-  <div class="title">好礼转转转</div>
-  <div class="subtitle">每日抽奖 · 惊喜不停</div>
 
-  <div class="remain">剩余抽奖次数 <span id="remainCount">5</span></div>
+  <!-- 联合品牌 -->
+  <div class="co-brand">
+    <div class="wc-badge">
+      <span class="trophy">🏆</span>
+      <span class="wc-text">
+        <strong>FIFA WORLD CUP</strong>
+        2026 官方赞助商
+      </span>
+    </div>
+  </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="wc-year-wrap">
+    <div class="wc-year">2026</div>
+  </div>
+  <div class="wc-sub">FIFA World Cup · USA · Canada · Mexico</div>
 
-  <div class="records" id="records">
-    <h4>📋 抽奖记录</h4>
-    <div id="recordList"><span style="color:rgba(255,255,255,0.45)">暂无记录</span></div>
+  <div class="main-title">
+    蒙牛<span class="hl">世界杯</span> · 营养每一刻
+  </div>
+  <div class="main-desc">参与抽奖赢取蒙牛×世界杯限定好礼</div>
+
+  <!-- 奖品预览 -->
+  <div class="prize-previews">
+    <div class="prize-card"><div class="picon">📱</div><div class="pname">定制手机</div></div>
+    <div class="prize-card"><div class="picon">🥛</div><div class="pname">特仑苏</div></div>
+    <div class="prize-card"><div class="picon">🧸</div><div class="pname">蒙小牛公仔</div></div>
+    <div class="prize-card"><div class="picon">🧧</div><div class="pname">88元红包</div></div>
+  </div>
+
+  <button class="btn-start" onclick="goLottery()">
+    🎁 开始抽奖 <span class="arrow">→</span>
+  </button>
+  <div class="landing-footer">蒙牛乳业 · FIFA 世界杯官方合作伙伴</div>
+</div>
+
+<!-- ==================== 抽奖页 ==================== -->
+<div class="page" id="lottery">
+  <button class="back-btn" onclick="goLanding()" title="返回">←</button>
+
+  <div class="bg-cloud c1"></div>
+  <div class="bg-cloud c2"></div>
+  <div class="cow-spot s1"></div>
+  <div class="cow-spot s2"></div>
+  <div class="cow-spot s3"></div>
+  <div class="grass"></div>
+
+  <div class="container">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="32" height="32" viewBox="0 0 100 100"><circle cx="42" cy="50" r="36" fill="#00A850"/><path d="M28 60 Q20 40 28 22 Q34 10 42 14 Q50 10 56 22 Q64 40 56 60 Z" fill="#fff"/><path d="M42 28 Q36 20 38 14 Q42 8 46 14 Q48 20 42 28 Z" fill="#00A850" opacity="0.7"/></svg>
+      </div>
+      <span class="brand-name">蒙 牛</span>
+    </div>
+    <div class="wc-strip">🏆 2026 FIFA 世界杯官方赞助商</div>
+    <div class="title">好礼转转转</div>
+    <div class="subtitle">每日抽奖 · 惊喜不停</div>
+
+    <div class="remain">剩余抽奖次数 <span id="remainCount">5</span></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="records" id="records">
+      <h4>📋 抽奖记录</h4>
+      <div id="recordList"><span style="color:rgba(255,255,255,0.45)">暂无记录</span></div>
+    </div>
   </div>
 </div>
 
 <script>
+// ==================== 页面切换 ====================
+function goLottery() {
+  document.getElementById('landing').classList.remove('active');
+  document.getElementById('lottery').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goLanding() {
+  document.getElementById('lottery').classList.remove('active');
+  document.getElementById('landing').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ==================== 落地页星星 ====================
+(function generateStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 50; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    const size = 1 + Math.random() * 2.5;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    container.appendChild(star);
+  }
+})();
+
 // ==================== 奖品配置 ====================
-// type: 'physical' = 实物需填写地址，'virtual' = 虚拟奖品无需地址
 const prizes = [
-  { id: 0, icon: '🧧', name: '88元红包',   desc: '可直接提现至微信零钱',  weight: 2,  type: 'virtual' },
-  { id: 1, icon: '📱', name: '蒙牛定制手机', desc: '蒙牛限定版智能手机一部', weight: 0.3, type: 'physical' },
-  { id: 2, icon: '🎧', name: '蓝牙耳机',    desc: '蒙牛联名款无线耳机',    weight: 1,  type: 'physical' },
-  { id: 3, icon: '🎟️', name: '5元优惠券',   desc: '蒙牛商城通用优惠券',     weight: 10, type: 'virtual' },
-  { id: 4, icon: '🥛', name: '蒙牛纯牛奶',  desc: '特仑苏纯牛奶一提(12盒)', weight: 2,  type: 'physical' },
-  { id: 5, icon: '🧸', name: '蒙牛公仔',    desc: '蒙小牛限定版毛绒公仔',    weight: 1,  type: 'physical' },
-  { id: 6, icon: '🎫', name: '3元优惠券',   desc: '蒙牛商城通用优惠券',     weight: 12, type: 'virtual' },
-  { id: 7, icon: '🌱', name: '谢谢参与',    desc: '下次好运，再试试吧',    weight: 15, type: 'virtual' },
-  { id: 8, icon: '🥤', name: '酸酸乳一箱',  desc: '蒙牛酸酸乳原味一箱',     weight: 2.5, type: 'physical' },
+  { id: 0, icon: '🧧', name: '88元红包',   desc: '可直接提现至微信零钱',     weight: 2,  type: 'virtual' },
+  { id: 1, icon: '📱', name: '蒙牛定制手机', desc: '蒙牛×世界杯限定版智能机', weight: 0.3, type: 'physical' },
+  { id: 2, icon: '🎧', name: '蓝牙耳机',    desc: '蒙牛联名款无线耳机',       weight: 1,  type: 'physical' },
+  { id: 3, icon: '🎟️', name: '5元优惠券',   desc: '蒙牛商城通用优惠券',       weight: 10, type: 'virtual' },
+  { id: 4, icon: '🥛', name: '蒙牛纯牛奶',  desc: '特仑苏纯牛奶一提(12盒)',   weight: 2,  type: 'physical' },
+  { id: 5, icon: '🧸', name: '蒙牛公仔',    desc: '蒙小牛世界杯限定版公仔',    weight: 1,  type: 'physical' },
+  { id: 6, icon: '🎫', name: '3元优惠券',   desc: '蒙牛商城通用优惠券',       weight: 12, type: 'virtual' },
+  { id: 7, icon: '🌱', name: '谢谢参与',    desc: '下次好运，再试试吧',       weight: 15, type: 'virtual' },
+  { id: 8, icon: '🥤', name: '酸酸乳一箱',  desc: '蒙牛酸酸乳原味一箱',       weight: 2.5, type: 'physical' },
 ];
 
 // ==================== 本地存储 ====================
 const STORAGE_KEY = 'mengniu_lottery';
-
 function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
   return { remain: 5, records: [], shipments: [] };
 }
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
 let state = loadData();
 let spinning = false;
@@ -455,12 +729,12 @@ let activeIndex = -1;
 let timer = null;
 
 // ==================== 渲染 ====================
-const grid = document.getElementById('grid');
+const gridEl = document.getElementById('grid');
 const remainEl = document.getElementById('remainCount');
 const recordList = document.getElementById('recordList');
 
 function buildGrid() {
-  grid.innerHTML = '';
+  gridEl.innerHTML = '';
   prizes.forEach((p, i) => {
     const cell = document.createElement('div');
     if (i === 4) {
@@ -472,21 +746,19 @@ function buildGrid() {
     } else {
       cell.className = 'cell';
       cell.innerHTML = `<span class="icon">${p.icon}</span><span class="name">${p.name}</span>`;
-      const pos = i <= 3 ? i : i + 1;
-      cell.style.order = pos >= 4 ? pos + 1 : pos;
+      cell.style.order = i <= 3 ? i : i + 1;
       cell.dataset.index = i;
     }
-    grid.appendChild(cell);
+    gridEl.appendChild(cell);
   });
 }
 
 function updateRemain() {
   remainEl.textContent = state.remain;
-  const btn = grid.querySelector('.cell.center');
-  if (state.remain === 0 || spinning) {
-    btn.classList.add('disabled');
-  } else {
-    btn.classList.remove('disabled');
+  const btn = gridEl.querySelector('.cell.center');
+  if (btn) {
+    if (state.remain === 0 || spinning) btn.classList.add('disabled');
+    else btn.classList.remove('disabled');
   }
 }
 
@@ -496,8 +768,7 @@ function updateRecords() {
     return;
   }
   recordList.innerHTML = state.records
-    .map(r => `<div class="record-item"><span class="time">${r.time}</span><span class="rprize">${r.name}</span></div>`)
-    .join('');
+    .map(r => `<div class="record-item"><span class="time">${r.time}</span><span class="rprize">${r.name}</span></div>`).join('');
 }
 
 // ==================== 抽奖算法 ====================
@@ -513,14 +784,11 @@ function weightedRandom() {
 
 // ==================== 动画 ====================
 function setActive(cellIndex) {
-  const prev = grid.querySelector('.cell.active');
+  const prev = gridEl.querySelector('.cell.active');
   if (prev) prev.classList.remove('active');
-  const cells = grid.querySelectorAll('.cell:not(.center)');
+  const cells = gridEl.querySelectorAll('.cell:not(.center)');
   for (const c of cells) {
-    if (parseInt(c.dataset.index) === cellIndex) {
-      c.classList.add('active');
-      break;
-    }
+    if (parseInt(c.dataset.index) === cellIndex) { c.classList.add('active'); break; }
   }
   activeIndex = cellIndex;
 }
@@ -533,13 +801,8 @@ function runAnimation(finalIndex, callback) {
   const finalRingPos = ringOrder.indexOf(finalIndex);
   const totalSteps = (3 * 8) + ((finalRingPos - currentRingPos + 8) % 8);
   let currentStep = 0;
-
   function tick() {
-    if (currentStep >= totalSteps) {
-      setActive(finalIndex);
-      setTimeout(callback, 300);
-      return;
-    }
+    if (currentStep >= totalSteps) { setActive(finalIndex); setTimeout(callback, 300); return; }
     const ringPos = (currentRingPos + 1 + currentStep) % 8;
     setActive(ringOrder[ringPos]);
     const progress = currentStep / totalSteps;
@@ -582,109 +845,70 @@ function showResult(prize) {
   overlay.className = 'overlay';
 
   if (isWin && prize.type === 'physical') {
-    // 实物奖品 → 显示收货地址表单
     overlay.innerHTML = `
       <div class="popup">
         <div class="prize-icon">${prize.icon}</div>
-        <div class="prize-name" style="color:#00A850">🎉 恭喜获得${prize.name}</div>
+        <div class="prize-name">🎉 恭喜获得${prize.name}</div>
         <div class="prize-desc">${prize.desc}</div>
         <div class="ship-form" id="shipForm">
           <div class="form-title">📦 填写收货信息</div>
-          <div class="field">
-            <label>收件人姓名</label>
-            <input type="text" id="shipName" placeholder="请输入真实姓名" autocomplete="name">
-            <span class="error">请输入姓名</span>
-          </div>
-          <div class="field">
-            <label>手机号码</label>
-            <input type="tel" id="shipPhone" placeholder="请输入手机号码" autocomplete="tel">
-            <span class="error">请输入正确的手机号码</span>
-          </div>
-          <div class="field">
-            <label>收货地址</label>
-            <textarea id="shipAddr" placeholder="省/市/区/详细地址"></textarea>
-            <span class="error">请输入完整收货地址</span>
-          </div>
+          <div class="field"><label>收件人姓名</label><input type="text" id="shipName" placeholder="请输入真实姓名"><span class="error">请输入姓名</span></div>
+          <div class="field"><label>手机号码</label><input type="tel" id="shipPhone" placeholder="请输入手机号码"><span class="error">请输入正确的手机号码</span></div>
+          <div class="field"><label>收货地址</label><textarea id="shipAddr" placeholder="省/市/区/详细地址"></textarea><span class="error">请输入完整收货地址</span></div>
         </div>
         <button id="btnSubmit">提交收货信息</button>
         <button class="btn-ghost" id="btnSkip">暂不填写，继续抽奖</button>
-      </div>
-    `;
+      </div>`;
 
     document.body.appendChild(overlay);
 
-    const nameInput = overlay.querySelector('#shipName');
-    const phoneInput = overlay.querySelector('#shipPhone');
-    const addrInput = overlay.querySelector('#shipAddr');
+    const n = overlay.querySelector('#shipName');
+    const p = overlay.querySelector('#shipPhone');
+    const a = overlay.querySelector('#shipAddr');
 
     overlay.querySelector('#btnSubmit').addEventListener('click', () => {
-      if (validateAndSubmit(overlay, prize, nameInput, phoneInput, addrInput)) {
-        // 成功后关闭
-      }
+      if (validateAndSubmit(overlay, prize, n, p, a)) {}
     });
-
     overlay.querySelector('#btnSkip').addEventListener('click', () => {
       overlay.remove();
       if (state.remain === 0) showAllOut();
     });
 
   } else {
-    // 虚拟奖品 / 谢谢参与 → 简单弹窗
     overlay.innerHTML = `
       <div class="popup">
         <div class="prize-icon">${prize.icon}</div>
         <div class="prize-name">${isWin ? prize.name : '😢 谢谢参与'}</div>
         <div class="prize-desc">${prize.desc}</div>
         <button>${state.remain > 0 ? '继续抽奖' : '知道了'}</button>
-      </div>
-    `;
+      </div>`;
     overlay.querySelector('button').addEventListener('click', () => {
       overlay.remove();
       if (state.remain === 0) showAllOut();
     });
   }
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) overlay.remove();
-  });
-
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
   if (isWin) spawnConfetti();
 }
 
-// ==================== 表单验证 & 提交 ====================
+// ==================== 表单 ====================
 function validateAndSubmit(overlay, prize, nameEl, phoneEl, addrEl) {
   let valid = true;
-
-  const nameF = nameEl.closest('.field');
-  const phoneF = phoneEl.closest('.field');
-  const addrF = addrEl.closest('.field');
-
-  nameF.classList.remove('invalid');
-  phoneF.classList.remove('invalid');
-  addrF.classList.remove('invalid');
-
+  [nameEl, phoneEl, addrEl].forEach(el => el.closest('.field').classList.remove('invalid'));
   const name = nameEl.value.trim();
   const phone = phoneEl.value.trim();
   const addr = addrEl.value.trim();
 
-  if (!name) { nameF.classList.add('invalid'); valid = false; }
-  if (!/^1\d{10}$/.test(phone)) { phoneF.classList.add('invalid'); valid = false; }
-  if (addr.length < 5) { addrF.classList.add('invalid'); valid = false; }
-
+  if (!name) { nameEl.closest('.field').classList.add('invalid'); valid = false; }
+  if (!/^1\d{10}$/.test(phone)) { phoneEl.closest('.field').classList.add('invalid'); valid = false; }
+  if (addr.length < 5) { addrEl.closest('.field').classList.add('invalid'); valid = false; }
   if (!valid) return false;
 
-  // 保存收货信息
-  state.shipments.push({
-    prize: prize.name,
-    name,
-    phone,
-    address: addr,
-    time: new Date().toLocaleString('zh-CN')
-  });
+  state.shipments.push({ prize: prize.name, name, phone, address: addr, time: new Date().toLocaleString('zh-CN') });
   saveData(state);
 
-  // 显示成功
   const popup = overlay.querySelector('.popup');
   popup.innerHTML = `
     <div class="submit-success">
@@ -692,17 +916,14 @@ function validateAndSubmit(overlay, prize, nameEl, phoneEl, addrEl) {
       <p style="font-size:16px;font-weight:700;color:#00A850;margin-bottom:4px;">提交成功</p>
       <p>我们将在7个工作日内发货<br>请保持手机畅通</p>
     </div>
-    <button>${state.remain > 0 ? '继续抽奖' : '知道了'}</button>
-  `;
+    <button>${state.remain > 0 ? '继续抽奖' : '知道了'}</button>`;
   popup.querySelector('button').addEventListener('click', () => {
     overlay.remove();
     if (state.remain === 0) showAllOut();
   });
-
   return true;
 }
 
-// ==================== 次数用完 ====================
 function showAllOut() {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
@@ -713,8 +934,7 @@ function showAllOut() {
       <div class="prize-name">今日抽奖机会已用完</div>
       <div class="prize-desc">共获得 ${winCount} 个奖品，明日再来！</div>
       <button>好的</button>
-    </div>
-  `;
+    </div>`;
   overlay.querySelector('button').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
@@ -722,7 +942,7 @@ function showAllOut() {
 
 // ==================== 彩带 ====================
 function spawnConfetti() {
-  const colors = ['#00A850', '#4CAF50', '#FFD700', '#FF9800', '#8BC34A', '#CDDC39', '#fff', '#81C784'];
+  const colors = ['#00A850','#4CAF50','#FFD700','#FF9800','#8BC34A','#fff','#81C784','#1a5cff'];
   for (let i = 0; i < 40; i++) {
     setTimeout(() => {
       const piece = document.createElement('div');
